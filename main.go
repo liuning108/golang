@@ -33,6 +33,8 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func main() {
+
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.Use(static.Serve("/", static.LocalFile("./views", true)))
