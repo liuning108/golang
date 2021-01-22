@@ -2,3 +2,5 @@ views
 .idea
 *.sum
 /.idea/
+*.log
+

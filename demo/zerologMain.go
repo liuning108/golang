@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"p2pserve/util"
 )
 
 func main() {
@@ -19,4 +20,6 @@ func main() {
 		Send()
 
 	log.Info().Msg("hello world")
+	util.Debugf("Just Test")
+
 }
