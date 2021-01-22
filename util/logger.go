@@ -35,7 +35,7 @@ const (
 func init() {
 	//初始设置为调试信息
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
-
+	//输出集
 	var writers []io.Writer
 	writers = append(writers, zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339})
 	writers = append(writers, newRollingFile())
