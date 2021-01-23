@@ -40,7 +40,7 @@ func main() {
 	r.Use(static.Serve("/", static.LocalFile("./views", true)))
 	r.GET("/api/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "pong",
+			"messagetype": "pong",
 		})
 	})
 	r.GET("/ws", func(c *gin.Context) {

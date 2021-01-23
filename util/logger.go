@@ -68,6 +68,11 @@ func Debugf(format string, v ...interface{}) {
 	log.Debug().Msgf(format, v...)
 }
 
+//正常输出日志信息
+func Infof(format string, v ...interface{}) {
+	log.Info().Msgf(format, v...)
+}
+
 //输出警告日志信息
 func Warnf(format string, v ...interface{}) {
 	log.Warn().Msgf(format, v...)

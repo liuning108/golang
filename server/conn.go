@@ -1,8 +1,11 @@
 package server
 
 import (
+	"errors"
 	"github.com/chuckpreslar/emission"
 	"github.com/gorilla/websocket"
+	"net"
+	"p2pserve/messagetype"
 	"p2pserve/util"
 	"sync"
 	"time"
@@ -59,14 +62,78 @@ func (conn *WebSocketConn) ReadMessage() {
 	var c = conn.socket
 
 	go func() {
+		for {
+			_, message, err := c.ReadMessage()
+			if err != nil {
+				util.Warnf("获取到错误: %v", err)
+				if c, k := err.(*websocket.CloseError); k {
+					conn.Emit("close", c.Code, c.Text)
+				} else {
+					//读写错误
+					if c, k := err.(*net.OpError); k {
+						//派发关闭事件
+						conn.Emit("close", 1008, c.Error())
+					}
+				}
+				close(stop)
+				break
+			}
+			//将消息放入通道里
+			in <- message
+		}
 
 	}()
 
 	for {
 		select {
 		case _ = <-pingTicker.C:
+			util.Infof("发送心跳包...")
+			//发送空包
+			heartPackage := map[string]interface{}{
+				//消息类型
+				"type": messagetype.HeartPackage.String(),
+				//空数据包
+				"data": "",
+			}
+			if err := conn.Send(util.Marshal(heartPackage)); err != nil {
+				util.Errorf("发送心跳包错误")
+				pingTicker.Stop()
+				return
+			}
+		case message := <-in:
+			util.Infof("接收到的数据:%s", message)
+			conn.Emit("message", []byte(message))
+		case <-stop:
+			return
 
 		}
+	}
+
+}
+
+func (conn *WebSocketConn) Send(message string) error {
+	util.Infof("发送数据:%s", message)
+	conn.mutex.Lock()
+	defer conn.mutex.Unlock()
+	if conn.closed {
+		return errors.New("websocket:write closed")
+	}
+	return conn.socket.WriteMessage(websocket.TextMessage, []byte(message))
+}
+
+func (conn *WebSocketConn) Close() {
+	//连接加锁
+	conn.mutex.Lock()
+	//延迟执行连接解锁
+	defer conn.mutex.Unlock()
+	if conn.closed == false {
+		util.Infof("关闭WebSocket连接 : ", conn)
+		//关闭WebSocket连接
+		conn.socket.Close()
+		//设置关闭状态为true
+		conn.closed = true
+	} else {
+		util.Warnf("连接已关闭 :", conn)
 	}
 
 }
