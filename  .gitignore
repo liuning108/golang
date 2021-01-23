@@ -3,4 +3,4 @@ views
 *.sum
 /.idea/
 *.log
-
+/vendor/
