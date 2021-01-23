@@ -46,3 +46,27 @@ func NewWebSocketConn(socket *websocket.Conn) *WebSocketConn {
 	//返回连接
 	return &conn
 }
+
+func (conn *WebSocketConn) ReadMessage() {
+	//创建一个读取消息的通道
+	in := make(chan []byte)
+	//创建一个通道关闭使用
+	stop := make(chan struct{})
+	//实例化一个Ping对象
+	pingTicker := time.NewTicker(pingPeriod)
+
+	//获取到socket对象
+	var c = conn.socket
+
+	go func() {
+
+	}()
+
+	for {
+		select {
+		case _ = <-pingTicker.C:
+
+		}
+	}
+
+}
