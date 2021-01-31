@@ -14,7 +14,7 @@ type P2PServer struct {
 }
 
 //WebSocket请求处理
-func (server *P2PServer) handleWebSocketRequest(writer http.ResponseWriter, request *http.Request) {
+func (server *P2PServer) HandleWebSocketRequest(writer http.ResponseWriter, request *http.Request) {
 	//返回头
 	responseHeader := http.Header{}
 	//升级为长连接

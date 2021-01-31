@@ -32,6 +32,14 @@ type RoomManager struct {
 	rooms map[string]*Room
 }
 
+//实例化房间管理对象
+func NewRoomManager() *RoomManager {
+	var roomManager = &RoomManager{
+		rooms: make(map[string]*Room),
+	}
+	return roomManager
+}
+
 //获取房间
 func (roomManager *RoomManager) getRoom(id string) *Room {
 	return roomManager.rooms[id]
