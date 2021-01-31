@@ -5,6 +5,7 @@ import (
 	"p2pserve/messagetype"
 	"p2pserve/server"
 	"p2pserve/util"
+	"strings"
 )
 
 //定义房间
@@ -50,12 +51,116 @@ func (roomManager *RoomManager) deleteRoom(id string) {
 //WebSocket消息处理
 func (roomManager *RoomManager) HandleNewWebSocket(conn *server.WebSocketConn, request *http.Request) {
 	util.Infof("On Open %v", request)
+	conn.On("message", func(message []byte) {
+		//解析Json数据
+		request, err := util.Unmarshal(string(message))
+		if err != nil {
+			util.Errorf("解析Json数据Unmarshal错误 %v", err)
+			return
+		}
+		//定义数据
+		var data map[string]interface{} = nil
+		tmp, found := request["data"]
+		if !found {
+			util.Errorf("没有发现数据!")
+			return
+		}
+		data = tmp.(map[string]interface{})
+		roomId := data["roomId"].(string)
+		util.Infof("房间Id: %v", roomId)
+		//根据roomId获取房间
+		room := roomManager.getRoom(roomId)
+		if room == nil {
+			room = roomManager.createRoom(roomId)
+		}
 
+		switch request["type"] {
+		case messagetype.JoinRoom.String():
+			onJoinRoom(conn, data, room, roomManager)
+			break
+		case messagetype.Offer.String():
+			fallthrough
+		case messagetype.Answer.String():
+			fallthrough
+		case messagetype.Candidate.String():
+			onCandidate(conn, data, room, roomManager, request)
+			break
+		case messagetype.HangUp.String():
+			onHangUp(conn, data, room, roomManager, request)
+			break
+		default:
+			{
+				util.Warnf("未知的请求 %v", request)
+			}
+			break
+		}
+
+	})
 	//连接关闭事件处理
 	conn.On("close", func(code int, text string) {
 		onClose(conn, roomManager)
 	})
 
+}
+
+func onHangUp(conn *server.WebSocketConn, data map[string]interface{}, room *Room, manager *RoomManager, request map[string]interface{}) {
+	sessionID := data[""].(string)
+	ids := strings.Split(sessionID, "-")
+	if user, ok := room.users[ids[0]]; !ok {
+		util.Warnf("用户 [" + ids[0] + "] 没有找到")
+		return
+	} else {
+		hangUp := map[string]interface{}{
+			"type": messagetype.HangUp.String(),
+			"data": map[string]interface{}{
+				"to":        ids[0],
+				"sessionId": sessionID,
+			},
+		}
+		//发送信息给目标User,即自己[0]
+		user.conn.Send(util.Marshal(hangUp))
+	}
+
+	if user, ok := room.users[ids[1]]; !ok {
+		util.Warnf("用户 [" + ids[1] + "] 没有找到")
+		return
+	} else {
+		hangUp := map[string]interface{}{
+			"type": messagetype.HangUp.String(),
+			"data": map[string]interface{}{
+				"to":        ids[1],
+				"sessionId": sessionID,
+			},
+		}
+		//发送信息给目标User,即对方[1]
+		user.conn.Send(util.Marshal(hangUp))
+	}
+
+}
+
+//offer/answer/candidate消息处理
+func onCandidate(conn *server.WebSocketConn, data map[string]interface{}, room *Room, manager *RoomManager, request map[string]interface{}) {
+	to := data["to"].(string)
+	if user, ok := room.users[to]; !ok {
+		util.Errorf("没有发现用户[" + to + "]")
+		return
+	} else {
+		user.conn.Send(util.Marshal(request))
+	}
+
+}
+
+func onJoinRoom(conn *server.WebSocketConn, data map[string]interface{}, room *Room, roomManager *RoomManager) {
+	//创建一个User
+	user := User{
+		conn: conn,
+		info: UserInfo{
+			ID:   data["id"].(string),
+			Name: data["name"].(string),
+		},
+	}
+	room.users[user.info.ID] = user
+	roomManager.notifyUserUpdate(conn, room.users)
 }
 
 //通知所有的用户更新
