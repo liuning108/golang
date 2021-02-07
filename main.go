@@ -33,6 +33,6 @@ func main() {
 	r.GET("/ws", func(c *gin.Context) {
 		wsServer.HandleWebSocketRequest(c.Writer, c.Request)
 	})
-	r.Run(":80")
-	//r.RunTLS(":443","./2_yunwu.red.crt","./3_yunwu.red.key") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	//	r.Run(":80")
+	r.RunTLS(":443", "./2_yunwu.red.crt", "./3_yunwu.red.key") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
