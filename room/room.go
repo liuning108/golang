@@ -1,6 +1,7 @@
 package room
 
 import (
+	"fmt"
 	"net/http"
 	"p2pserve/messagetype"
 	"p2pserve/server"
@@ -59,7 +60,19 @@ func (roomManager *RoomManager) deleteRoom(id string) {
 //WebSocket消息处理
 func (roomManager *RoomManager) HandleNewWebSocket(conn *server.WebSocketConn, request *http.Request) {
 	util.Infof("On Open %v", request)
+	defer func() {
+
+		if r := recover(); r != nil {
+			fmt.Printf("捕获到的错误：%s\n", r)
+		}
+	}()
 	conn.On("message", func(message []byte) {
+		defer func() {
+
+			if r := recover(); r != nil {
+				fmt.Printf("捕获到的错误：%s\n", r)
+			}
+		}()
 		//解析Json数据
 		request, err := util.Unmarshal(string(message))
 		if err != nil {
@@ -112,7 +125,7 @@ func (roomManager *RoomManager) HandleNewWebSocket(conn *server.WebSocketConn, r
 }
 
 func onHangUp(conn *server.WebSocketConn, data map[string]interface{}, room *Room, manager *RoomManager, request map[string]interface{}) {
-	sessionID := data[""].(string)
+	sessionID := data["sessionId"].(string)
 	ids := strings.Split(sessionID, "-")
 	if user, ok := room.users[ids[0]]; !ok {
 		util.Warnf("用户 [" + ids[0] + "] 没有找到")
