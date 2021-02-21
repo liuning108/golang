@@ -1,6 +1,8 @@
 package util
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 //将数据map[string]interface{}编码成Json字符串
 func Marshal(m map[string]interface{}) string {
@@ -20,4 +22,11 @@ func Unmarshal(str string) (map[string]interface{}, error) {
 		return nil, err
 	}
 	return data, nil
+}
+
+func GenMessage(msgType string, message map[string]interface{}) string {
+	request := make(map[string]interface{})
+	request["type"] = msgType
+	request["data"] = message
+	return Marshal(request)
 }

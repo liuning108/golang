@@ -33,8 +33,8 @@ func (server *P2PServer) HandleWebSocketRequest(writer http.ResponseWriter, requ
 
 }
 
-//实例化一个P2P服务
-func NewP2PServer(wsHandler func(ws *WebSocketConn, request *http.Request)) *P2PServer {
+//实例化一个Ws服务
+func NewWsServer(wsHandler func(ws *WebSocketConn, request *http.Request)) *P2PServer {
 	var server = &P2PServer{
 		handleWebSocket: wsHandler,
 	}

@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
-	"p2pserve/room"
 	"p2pserve/server"
 	"p2pserve/tencentyun"
 )
@@ -25,9 +24,10 @@ const (
 )
 
 func main() {
-
-	roomManager := room.NewRoomManager() //
-	wsServer := server.NewP2PServer(roomManager.HandleNewWebSocket)
+	allManager := server.NewAllManager()
+	roomManager := server.NewRoomManager() //
+	roomServer := server.NewWsServer(roomManager.HandleNewWebSocket)
+	allServe := server.NewWsServer(allManager.HandleNewWebSocket)
 	r := gin.Default()
 	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.Use(static.Serve("/", static.LocalFile("./views", true)))
@@ -36,8 +36,12 @@ func main() {
 			"messagetype": "pong",
 		})
 	})
+	r.GET("/ws/room", func(c *gin.Context) {
+		roomServer.HandleWebSocketRequest(c.Writer, c.Request)
+	})
+
 	r.GET("/ws", func(c *gin.Context) {
-		wsServer.HandleWebSocketRequest(c.Writer, c.Request)
+		allServe.HandleWebSocketRequest(c.Writer, c.Request)
 	})
 
 	r.GET("/usersig/:userId", func(c *gin.Context) {

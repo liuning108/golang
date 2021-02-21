@@ -4,6 +4,9 @@ type MessageType int32
 
 const (
 	HeartPackage   MessageType = iota
+	Login                      //登录
+	Close                      //退出
+	CheckOut                   //踢出
 	JoinRoom                   //加入房间
 	Offer                      //Offer消息
 	Answer                     //Answer消息
@@ -16,6 +19,12 @@ const (
 
 func (p MessageType) String() string {
 	switch p {
+	case Close:
+		return "close"
+	case Login:
+		return "login"
+	case CheckOut:
+		return "checkOut"
 	case HeartPackage:
 		return "heartPackage"
 	case JoinRoom:

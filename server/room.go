@@ -1,10 +1,9 @@
-package room
+package server
 
 import (
 	"fmt"
 	"net/http"
 	"p2pserve/messagetype"
-	"p2pserve/server"
 	"p2pserve/util"
 	"strings"
 )
@@ -58,7 +57,7 @@ func (roomManager *RoomManager) deleteRoom(id string) {
 }
 
 //WebSocket消息处理
-func (roomManager *RoomManager) HandleNewWebSocket(conn *server.WebSocketConn, request *http.Request) {
+func (roomManager *RoomManager) HandleNewWebSocket(conn *WebSocketConn, request *http.Request) {
 	util.Infof("On Open %v", request)
 	defer func() {
 
@@ -124,7 +123,7 @@ func (roomManager *RoomManager) HandleNewWebSocket(conn *server.WebSocketConn, r
 
 }
 
-func onHangUp(conn *server.WebSocketConn, data map[string]interface{}, room *Room, manager *RoomManager, request map[string]interface{}) {
+func onHangUp(conn *WebSocketConn, data map[string]interface{}, room *Room, manager *RoomManager, request map[string]interface{}) {
 	sessionID := data["sessionId"].(string)
 	ids := strings.Split(sessionID, "-")
 	if user, ok := room.users[ids[0]]; !ok {
@@ -160,7 +159,7 @@ func onHangUp(conn *server.WebSocketConn, data map[string]interface{}, room *Roo
 }
 
 //offer/answer/candidate消息处理
-func onCandidate(conn *server.WebSocketConn, data map[string]interface{}, room *Room, manager *RoomManager, request map[string]interface{}) {
+func onCandidate(conn *WebSocketConn, data map[string]interface{}, room *Room, manager *RoomManager, request map[string]interface{}) {
 	to := data["to"].(string)
 	if user, ok := room.users[to]; !ok {
 		util.Errorf("没有发现用户[" + to + "]")
@@ -171,7 +170,7 @@ func onCandidate(conn *server.WebSocketConn, data map[string]interface{}, room *
 
 }
 
-func onJoinRoom(conn *server.WebSocketConn, data map[string]interface{}, room *Room, roomManager *RoomManager) {
+func onJoinRoom(conn *WebSocketConn, data map[string]interface{}, room *Room, roomManager *RoomManager) {
 	//创建一个User
 	user := User{
 		conn: conn,
@@ -185,7 +184,7 @@ func onJoinRoom(conn *server.WebSocketConn, data map[string]interface{}, room *R
 }
 
 //通知所有的用户更新
-func (roomManager *RoomManager) notifyUserUpdate(conn *server.WebSocketConn, users map[string]User) {
+func (roomManager *RoomManager) notifyUserUpdate(conn *WebSocketConn, users map[string]User) {
 	infos := []UserInfo{}
 	for _, userClient := range users {
 		infos = append(infos, userClient.info)
@@ -202,7 +201,7 @@ func (roomManager *RoomManager) notifyUserUpdate(conn *server.WebSocketConn, use
 }
 
 //连接关闭
-func onClose(conn *server.WebSocketConn, roomManager *RoomManager) {
+func onClose(conn *WebSocketConn, roomManager *RoomManager) {
 	util.Infof("连接关闭 %v", conn)
 	var userId string = ""
 	var roomId string = ""

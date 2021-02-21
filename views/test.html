@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+    window.onload = ()=>{
+        let  userId=1;///Math.random()*10000;
+        let url =`ws://localhost/ws?userId=${window.parseInt(userId)}`;
+        const ws =  new WebSocket(url)
+
+        ws.onmessage = (evt)=>{
+          console.log(evt.data)
+       }
+
+    }
+</script>
+</body>
+</html>

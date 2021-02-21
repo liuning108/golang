@@ -1,8 +1,4 @@
-package room
-
-import (
-	"p2pserve/server"
-)
+package server
 
 //用户信息
 type UserInfo struct {
@@ -14,7 +10,7 @@ type User struct {
 	//用户信息
 	info UserInfo
 	//连接对象
-	conn *server.WebSocketConn
+	conn *WebSocketConn
 }
 
 //会话信息
