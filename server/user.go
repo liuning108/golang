@@ -2,8 +2,9 @@ package server
 
 //用户信息
 type UserInfo struct {
-	ID   string `json:"id"`   //ID
-	Name string `json:"name"` //名称
+	ID     string `json:"id"`     //ID
+	Name   string `json:"name"`   //名称
+	RoomId string `json:"roomId"` //roomId
 }
 
 type User struct {

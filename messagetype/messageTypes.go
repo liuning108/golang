@@ -3,22 +3,25 @@ package messagetype
 type MessageType int32
 
 const (
-	HeartPackage   MessageType = iota
-	Login                      //登录
-	Close                      //退出
-	CheckOut                   //踢出
-	JoinRoom                   //加入房间
-	Offer                      //Offer消息
-	Answer                     //Answer消息
-	Candidate                  //Candidate消息
-	HangUp                     //挂断
-	LeaveRoom                  //离开房间
-	UpdateUserList             //更新房间用户列表
+	HeartPackage      MessageType = iota
+	UpdateAllUserList             //更新用户列表
+	Login                         //登录
+	Close                         //退出
+	CheckOut                      //踢出
+	JoinRoom                      //加入房间
+	Offer                         //Offer消息
+	Answer                        //Answer消息
+	Candidate                     //Candidate消息
+	HangUp                        //挂断
+	LeaveRoom                     //离开房间
+	UpdateUserList                //更新房间用户列表
 
 )
 
 func (p MessageType) String() string {
 	switch p {
+	case UpdateAllUserList:
+		return "updateAllUserList"
 	case Close:
 		return "close"
 	case Login:
